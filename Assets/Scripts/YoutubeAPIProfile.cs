@@ -9,7 +9,7 @@ namespace Ichikara.YoutubeComment
     public class YoutubeAPIProfile
     {
         public string kind;
-        public object etag;
+        public string etag;
         public string nextPageToken;
         public string prevPageToken;
         public PageInfo pageInfo;

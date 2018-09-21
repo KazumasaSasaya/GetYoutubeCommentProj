@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 114899316115520230}
   - component: {fileID: 114611706484983972}
   m_Layer: 5
-  m_Name: CommentCanvas
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

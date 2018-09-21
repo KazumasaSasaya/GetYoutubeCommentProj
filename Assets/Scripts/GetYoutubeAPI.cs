@@ -3,17 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-
 namespace Ichikara.YoutubeComment
 {
     public class GetYoutubeAPI : MonoBehaviour
     {
-        //private string apiKey = "";//apiのキー
-        //private const string URL_BASE = "https://www.googleapis.com/youtube/v3/";
-        //private const string CHANNEL_ID = "liveChat/messages?liveChatId=";
-        //private string chatId = "";//チャットID、処理で入れる
-
-        private string apikey = "AIzaSyA9PjZD7bwQ8b08Deu3ia78gLMHqJoXRz0";
+        private string apikey = "xxx";//apikeyを入れる
 
         private string searchBaseURI = "https://www.googleapis.com/youtube/v3/search?key=";
 
