@@ -38,3 +38,6 @@ sysinfo.txt
 # Api Key
 APIKEY.cs
 APIKEY.cs.meta
+
+# Log Data
+LogData.txt

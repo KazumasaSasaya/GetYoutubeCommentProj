@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -78,6 +79,39 @@ namespace Ichikara.YoutubeComment
                 ret = ret.Replace(del, String.Empty);
             }
             return ret;
+        }
+
+
+
+        private const string LOG_URL = "./LogData.txt";
+        /// <summary>
+        /// テキスト出力
+        /// PCdebugのみ動作可能
+        /// プロジェクトフォルダ直下に生成
+        /// </summary>
+        /// <param name="txt">Text.</param>
+        public static void TextOutput(string txt)
+        {
+#if DEBUG
+            StreamWriter sw = new StreamWriter(LOG_URL, true);//ファイル内容の末尾に追記
+            sw.WriteLine(txt);
+            sw.Flush();
+            sw.Close();
+#endif
+        }
+
+        /// <summary>
+        /// テキスト出力されたログをリセット
+        /// PCdebugのみ動作可能
+        /// </summary>
+        public static void TextReset()
+        {
+#if DEBUG
+            StreamWriter sw = new StreamWriter(LOG_URL, false);//ファイル内容を上書き
+            sw.WriteLine("");
+            sw.Flush();
+            sw.Close();
+#endif
         }
     }
 }

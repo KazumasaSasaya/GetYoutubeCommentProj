@@ -36,15 +36,26 @@ namespace Ichikara.YoutubeComment
 
         private string jsontext;
 
-
         private string chatURIbottom2 = "&part=snippet,authorDetails&key=";
 
-        private string[] deleteString = { " ", "\r", "\n", "\"", ":", "videoId", "activeLiveChatId" };
+        private string[] splitString = { "\r\n", "\n" };
+
+        private string[] deleteString = { " ", "\r", "\n", "\"", ":", "videoId", "activeLiveChatId", "displayMessage", "displayName", "nextPageToken" };
+
+        private List<Comment> commentList;
+
+        [Tooltip("コメント最大保持数")] [Range(20, 200)] [SerializeField] private int holdingNumber = 50;
+
+        [Tooltip("コメント再取得インターバル(ミリ秒)")] [Range(4000, 10000)] [SerializeField] private int IntervalMillis = 5000;
 
         private void Start()
         {
             videoId = null;
             chatId = null;
+            commentList = new List<Comment>();
+
+            //debug用関数
+            JsonStringFormatter.TextReset();
         }
 
         //public
@@ -71,15 +82,13 @@ namespace Ichikara.YoutubeComment
             {
                 Debug.Log(liverequest.downloadHandler.text);
 
-
-                string[] split = { "\r\n", "\n" };
-                string[] jsonData = liverequest.downloadHandler.text.Split(split, StringSplitOptions.None);
+                string[] jsonData = liverequest.downloadHandler.text.Split(splitString, StringSplitOptions.None);
 
                 foreach (var json in jsonData)
                 {
 
                     //videoIdでなければcontinue
-                    if (json.IndexOf("videoId") < 0)
+                    if (json.IndexOf("videoId") <= 0)
                     {
                         Debug.Log("This is not videoId.");
                         continue;
@@ -119,12 +128,11 @@ namespace Ichikara.YoutubeComment
             }
             else
             {
-                string[] split = { "\r\n", "\n" };
-                string[] jsonData = channelRequest.downloadHandler.text.Split(split, StringSplitOptions.None);
+                string[] jsonData = channelRequest.downloadHandler.text.Split(splitString, StringSplitOptions.None);
 
                 foreach(var json in jsonData)
                 {
-                    if(json.IndexOf("activeLiveChatId") < 0)
+                    if(json.IndexOf("activeLiveChatId") <= 0)
                     {
                         Debug.Log("This is not comment.");
                         continue;
@@ -143,67 +151,76 @@ namespace Ichikara.YoutubeComment
 
         private IEnumerator GetComment()
         {
-            var chatURI = youtubeAPIbase + chatURIUp + chatId + pagetoken + nextPageTokenstr + chatURIbottom2 + apikey;
+            //コルーチンが２つ以上にならないように止める
+            StopCoroutine(InvokeWait());
+            //yield return new WaitForSeconds(5.0f);
 
+            var commentURI = youtubeAPIbase + chatURIUp + chatId + pagetoken + nextPageTokenstr + chatURIbottom2 + apikey;
 
+            Debug.Log("CommentURI : " + commentURI);
 
-            UnityWebRequest connectChatRequest = UnityWebRequest.Get(chatURI);
-            yield return connectChatRequest.SendWebRequest();
+            UnityWebRequest connectCommentRequest = UnityWebRequest.Get(commentURI);
+            yield return connectCommentRequest.SendWebRequest();
 
-            if(connectChatRequest.isHttpError || connectChatRequest.isNetworkError)
+            if(connectCommentRequest.isHttpError || connectCommentRequest.isNetworkError)
             {
-                Debug.LogError(connectChatRequest.error);
+                Debug.LogError(connectCommentRequest.error);
             }
             else
             {
-                string[] split = { "\r\n", "\n" };
-                string[] jsonData = connectChatRequest.downloadHandler.text.Split(split, StringSplitOptions.None);
+                string[] jsonData = connectCommentRequest.downloadHandler.text.Split(splitString, StringSplitOptions.None);
 
                 Debug.Log("コメント--------------------");
-                foreach(var json in jsonData)
+                Debug.Log(connectCommentRequest.downloadHandler.text);
+                Comment comment = new Comment();
+                foreach (var json in jsonData)
                 {
-                    //Debug.Log(json);
-                    //yield return null;
+                    JsonStringFormatter.TextOutput(json);
+                    if (json.IndexOf("nextPageToken") > 0)
+                    {
+                        string newToken = JsonStringFormatter.GetFormattedString(deleteString, json);
 
+                        Debug.Log("newToken : " + newToken);
+                        Debug.Log("nextPageTokenstr : " + nextPageTokenstr);
+                        if (nextPageTokenstr == newToken)
+                        {
+                            Debug.Log("Same Token.");
+                            break;
+                        }
+                        else
+                        {
+                            nextPageTokenstr = newToken;
+                            Debug.Log("Change Token.");
+                            continue;
+                        }
+                    }
+
+                    if (json.IndexOf("displayMessage") <= 0 && json.IndexOf("displayName") <= 0)
+                    {
+                        continue;
+                    }
+
+                    if (json.IndexOf("displayMessage") > 0)
+                    {
+                        comment.displayMessage = JsonStringFormatter.GetFormattedString(deleteString, json);
+                        Debug.Log("displayMessage : " + comment.displayMessage);
+                    }
+                    if (json.IndexOf("displayName") > 0)
+                    {
+                        comment.displayName = JsonStringFormatter.GetFormattedString(deleteString, json);
+                        Debug.Log("displayName : " + comment.displayName);
+                    }
                 }
+                StartCoroutine(InvokeWait());
             }
+        }
 
-            //nextPageTokenstr = (string)commentlogjson["nextPageToken"];
-            //Debug.Log(nextPageTokenstr);
+        private IEnumerator InvokeWait()
+        {
 
+            yield return new WaitForSeconds(IntervalMillis);
 
-
-            //var pageinfo = (IDictionary)commentlogjson["pageInfo"];
-            ////var totalResults = (IDictionary)pageinfo[0];
-            //int commentcount = int.Parse(pageinfo["totalResults"].ToString());
-            //Debug.Log(commentcount + " : countnum");
-
-            ////コメント分だけ描画
-            //for (var i = 0; i < (int)commentcount; i++)
-            //{
-            //    GameObject cvn = Instantiate(canvas);
-
-            //    var citems = (IList)commentlogjson["items"];
-            //    var cslsd = (IDictionary)citems[i];
-            //    var clad = (IDictionary)cslsd["snippet"];
-            //    string message = (string)clad["displayMessage"];
-
-            //    cvn.transform.Find("Description").gameObject.GetComponent<Text>().text = message;
-
-            //    var author = (IDictionary)cslsd["authorDetails"];
-            //    //var cslsd = (IDictionary)author[i];
-            //    var dispName = (string)author["displayName"];
-
-            //    cvn.transform.Find("Name").gameObject.GetComponent<Text>().text = dispName;
-
-            //    float _x = UnityEngine.Random.Range(-400f, 400f);
-            //    float _y = UnityEngine.Random.Range(-250f, 250f);
-            //    cvn.transform.position = new Vector3(_x, _y, cvn.transform.position.z);
-            //}
-
-
-
-
+            StartCoroutine(GetComment());
         }
     }
 }
