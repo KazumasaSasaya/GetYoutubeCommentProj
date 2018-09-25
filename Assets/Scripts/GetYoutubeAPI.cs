@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -7,13 +8,13 @@ namespace Ichikara.YoutubeComment
 {
     public class GetYoutubeAPI : MonoBehaviour
     {
-        private string apikey = "xxx";//apikeyを入れる
+        private string apikey = APIKEY.API_KEY;//apikeyを入れる
 
         private string searchBaseURI = "https://www.googleapis.com/youtube/v3/search?key=";
 
         private string searchBaseParts = "&part=snippet&channelId=";
 
-        private string searchBaseChannnel = "UCpWBCGo4gEtrhMeB-IEwbdw";//ここを書き換えるYoutubeチャンネル
+        private string searchBaseChannnel = "UCQINXHZqCU5i06HzxRkujfg";//ここを書き換えるYoutubeチャンネル
 
         private string searchBaseStr = "&eventType=live&type=video";
 
@@ -38,17 +39,12 @@ namespace Ichikara.YoutubeComment
 
         private string chatURIbottom2 = "&part=snippet,authorDetails&key=";
 
+        private string[] deleteString = { " ", "\r", "\n", "\"", ":", "videoId", "activeLiveChatId" };
 
-        // Use this for initialization
-        void Start()
+        private void Start()
         {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            videoId = null;
+            chatId = null;
         }
 
         //public
@@ -69,50 +65,144 @@ namespace Ichikara.YoutubeComment
 
             if (liverequest.isHttpError || liverequest.isNetworkError)
             {
-
                 Debug.LogError(liverequest.error);
-
             }
             else
             {
-                YoutubeAPIProfile ss = new YoutubeAPIProfile();
-                ss = JsonUtility.FromJson<YoutubeAPIProfile>(liverequest.downloadHandler.text);
-                Debug.Log("profile.kind:" + ss.kind);
-                Debug.Log("profile.nextpagetoken" + ss.nextPageToken);
-                Debug.Log("profile.prevpagetoken" + ss.prevPageToken);
-                Debug.Log("profile.etag" + ss.etag);
-                Debug.Log("profile.pageinfo.totalResults" + ss.pageInfo.totalResults);
-                Debug.Log("profile.pageinfo.resultsPerPage" + ss.pageInfo.resultsPerPage);
-                Debug.Log("profile.items" + ss.items);
-                Debug.Log("response: " + liverequest.downloadHandler.text);
+                Debug.Log(liverequest.downloadHandler.text);
 
 
+                string[] split = { "\r\n", "\n" };
+                string[] jsonData = liverequest.downloadHandler.text.Split(split, StringSplitOptions.None);
 
+                foreach (var json in jsonData)
+                {
 
-                //jsontext = liverequest.downloadHandler.text;
-                ////MiniJSON　つかうー！！！！
-                //var mjson = (IDictionary)MiniJSON.Json.Deserialize(jsontext);
-                //Debug.Log("miniJson 1 : " + jsontext);
+                    //videoIdでなければcontinue
+                    if (json.IndexOf("videoId") < 0)
+                    {
+                        Debug.Log("This is not videoId.");
+                        continue;
+                    }
 
-                //var mitems = (IList)mjson["items"];
-                //var mid = (IDictionary)mitems[0];
-                //var sid = (IDictionary)mid["id"];
-                //string mvideoId = (string)sid["videoId"];
-                //Debug.Log(mvideoId);
-                ////videoIdを取得
-                //videoId = (string)sid["videoId"];
+                    //videoIdの整形
+                    videoId = JsonStringFormatter.GetFormattedString(deleteString, json);
+                    Debug.Log("videoId : " + videoId);
 
+                    break;
+                }
 
-                /*vs2017ならできる？？
-                var chatJsonObj = JsonConvert.DeserializeObject<dynamic>(jsontext);
-                string videoId2 = chatJsonObj.items[0].id.videoId;
-                Debug.Log("videoID2017 : " + videoId2);
-                */
+                // videoIdがない場合は処理を打ち切る
+                if (videoId == null)
+                {
+                    Debug.LogWarning("videoId does not exist.");
+                    yield break;
+                }
 
-
-                //StartCoroutine(GetChatId());
+                // chatIdを取得
+                StartCoroutine(GetChatId());
 
             }
+        }
+
+        private IEnumerator GetChatId()
+        {
+            // TODO: JsonStringFormatterクラスにchannelを作らせる
+            string channel = youtubeAPIbase + channnelSearch + videoId + "&key=" + apikey;
+            Debug.Log(channel);
+            UnityWebRequest channelRequest = UnityWebRequest.Get(channel);
+            yield return channelRequest.SendWebRequest();
+
+            if (channelRequest.isHttpError || channelRequest.isNetworkError)
+            {
+                Debug.LogError(channelRequest.error);
+            }
+            else
+            {
+                string[] split = { "\r\n", "\n" };
+                string[] jsonData = channelRequest.downloadHandler.text.Split(split, StringSplitOptions.None);
+
+                foreach(var json in jsonData)
+                {
+                    if(json.IndexOf("activeLiveChatId") < 0)
+                    {
+                        Debug.Log("This is not comment.");
+                        continue;
+                    }
+                    Debug.Log("-----------------------");
+                    Debug.Log(channelRequest.downloadHandler.text);
+
+                    chatId = JsonStringFormatter.GetFormattedString(deleteString, json);
+                    break;
+                }
+
+                StartCoroutine(GetComment());
+            }
+
+        }
+
+        private IEnumerator GetComment()
+        {
+            var chatURI = youtubeAPIbase + chatURIUp + chatId + pagetoken + nextPageTokenstr + chatURIbottom2 + apikey;
+
+
+
+            UnityWebRequest connectChatRequest = UnityWebRequest.Get(chatURI);
+            yield return connectChatRequest.SendWebRequest();
+
+            if(connectChatRequest.isHttpError || connectChatRequest.isNetworkError)
+            {
+                Debug.LogError(connectChatRequest.error);
+            }
+            else
+            {
+                string[] split = { "\r\n", "\n" };
+                string[] jsonData = connectChatRequest.downloadHandler.text.Split(split, StringSplitOptions.None);
+
+                Debug.Log("コメント--------------------");
+                foreach(var json in jsonData)
+                {
+                    //Debug.Log(json);
+                    //yield return null;
+
+                }
+            }
+
+            //nextPageTokenstr = (string)commentlogjson["nextPageToken"];
+            //Debug.Log(nextPageTokenstr);
+
+
+
+            //var pageinfo = (IDictionary)commentlogjson["pageInfo"];
+            ////var totalResults = (IDictionary)pageinfo[0];
+            //int commentcount = int.Parse(pageinfo["totalResults"].ToString());
+            //Debug.Log(commentcount + " : countnum");
+
+            ////コメント分だけ描画
+            //for (var i = 0; i < (int)commentcount; i++)
+            //{
+            //    GameObject cvn = Instantiate(canvas);
+
+            //    var citems = (IList)commentlogjson["items"];
+            //    var cslsd = (IDictionary)citems[i];
+            //    var clad = (IDictionary)cslsd["snippet"];
+            //    string message = (string)clad["displayMessage"];
+
+            //    cvn.transform.Find("Description").gameObject.GetComponent<Text>().text = message;
+
+            //    var author = (IDictionary)cslsd["authorDetails"];
+            //    //var cslsd = (IDictionary)author[i];
+            //    var dispName = (string)author["displayName"];
+
+            //    cvn.transform.Find("Name").gameObject.GetComponent<Text>().text = dispName;
+
+            //    float _x = UnityEngine.Random.Range(-400f, 400f);
+            //    float _y = UnityEngine.Random.Range(-250f, 250f);
+            //    cvn.transform.position = new Vector3(_x, _y, cvn.transform.position.z);
+            //}
+
+
+
 
         }
     }
