@@ -10,7 +10,7 @@ namespace Ichikara.YoutubeComment
     /// <summary>
     /// Json string formatter.
     /// </summary>
-    public static class JsonStringFormatter
+    public static class StringFormatter
     {
         /// <summary>
         /// Jsonファイルのネスト情報を取り出す

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 namespace Ichikara.YoutubeComment
 {
     public class CommentManager : MonoBehaviour

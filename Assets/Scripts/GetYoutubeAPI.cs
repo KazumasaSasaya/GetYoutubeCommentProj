@@ -57,7 +57,7 @@ namespace Ichikara.YoutubeComment
             commentManager = CommentManager.Instance;
 
             //debug用関数
-            JsonStringFormatter.TextReset();
+            StringFormatter.TextReset();
         }
 
         //public
@@ -67,7 +67,10 @@ namespace Ichikara.YoutubeComment
         }
 
 
-        //private
+        /// <summary>
+        /// チャンネルIDから現在のライブIDを取得するコルーチン
+        /// </summary>
+        /// <returns>The URIC oroutine.</returns>
         private IEnumerator GetURICoroutine()
         {
             string uriStr = searchBaseURI + apikey + searchBaseParts + searchBaseChannnel + searchBaseStr;
@@ -97,7 +100,7 @@ namespace Ichikara.YoutubeComment
                     }
 
                     //videoIdの整形
-                    videoId = JsonStringFormatter.GetFormattedString(deleteString, json);
+                    videoId = StringFormatter.GetFormattedString(deleteString, json);
                     Debug.Log("videoId : " + videoId);
 
                     break;
@@ -116,6 +119,10 @@ namespace Ichikara.YoutubeComment
             }
         }
 
+        /// <summary>
+        /// YoutubeライブのチャットIDを取得するコルーチン
+        /// </summary>
+        /// <returns>The chat identifier.</returns>
         private IEnumerator GetChatId()
         {
             // TODO: JsonStringFormatterクラスにchannelを作らせる
@@ -143,7 +150,7 @@ namespace Ichikara.YoutubeComment
                         continue;
                     }
 
-                    chatId = JsonStringFormatter.GetFormattedString(deleteString, json);
+                    chatId = StringFormatter.GetFormattedString(deleteString, json);
                     break;
                 }
 
@@ -181,10 +188,10 @@ namespace Ichikara.YoutubeComment
                 CommentParts comment = new CommentParts();
                 foreach (var json in jsonData)
                 {
-                    JsonStringFormatter.TextOutput(json);
+                    StringFormatter.TextOutput(json);
                     if (json.IndexOf("nextPageToken") > 0)
                     {
-                        string newToken = JsonStringFormatter.GetFormattedString(deleteString, json);
+                        string newToken = StringFormatter.GetFormattedString(deleteString, json);
 
                         Debug.Log("newToken : " + newToken);
                         Debug.Log("nextPageTokenstr : " + nextPageTokenstr);
@@ -202,12 +209,12 @@ namespace Ichikara.YoutubeComment
 
                     if (json.IndexOf("displayMessage") > 0)
                     {
-                        comment.displayMessage = JsonStringFormatter.GetFormattedString(deleteString, json);
+                        comment.displayMessage = StringFormatter.GetFormattedString(deleteString, json);
                         Debug.Log("displayMessage : " + comment.displayMessage);
                     }
                     if (json.IndexOf("displayName") > 0)
                     {
-                        comment.displayName = JsonStringFormatter.GetFormattedString(deleteString, json);
+                        comment.displayName = StringFormatter.GetFormattedString(deleteString, json);
                         Debug.Log("displayName : " + comment.displayName);
                     }
 

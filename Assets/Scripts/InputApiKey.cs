@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Ichikara.YoutubeComment;
 
-[RequireComponent(typeof(InputField))]
+
 public class InputApiKey : MonoBehaviour {
     [SerializeField] private GetYoutubeAPI youtubeApi;
     [SerializeField] private InputField field;
