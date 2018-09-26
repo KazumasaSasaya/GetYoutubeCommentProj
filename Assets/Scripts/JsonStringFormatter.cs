@@ -5,12 +5,11 @@ using UnityEngine;
 using System;
 using System.Text.RegularExpressions;
 
-/***
- * UnityJsonUtilityラッパークラス
- * ネストされているデータのシリアライズ・デシリアライズを行う
- */
 namespace Ichikara.YoutubeComment
 {
+    /// <summary>
+    /// Json string formatter.
+    /// </summary>
     public static class JsonStringFormatter
     {
         /// <summary>

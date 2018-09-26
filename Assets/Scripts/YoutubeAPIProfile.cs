@@ -28,10 +28,10 @@ namespace Ichikara.YoutubeComment
         public int resultsPerPage;
     }
 
-    public class Comment
-    {
-        public string Id;
-        public string displayName;
-        public string displayMessage;
-    }
+    //public class Comment
+    //{
+    //    public string Id;
+    //    public string displayName;
+    //    public string displayMessage;
+    //}
 }

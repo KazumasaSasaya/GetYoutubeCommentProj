@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Ichikara.YoutubeComment;
 
 namespace Ichikara.YoutubeComment
 {
@@ -42,7 +43,7 @@ namespace Ichikara.YoutubeComment
 
         private string[] deleteString = { " ", "\r", "\n", "\"", ":", "videoId", "activeLiveChatId", "displayMessage", "displayName", "nextPageToken" };
 
-        private List<Comment> commentList;
+        private GameObject commentManager;//シングルトンクラス
 
         [Tooltip("コメント最大保持数")] [Range(20, 200)] [SerializeField] private int holdingNumber = 50;
 
@@ -52,7 +53,8 @@ namespace Ichikara.YoutubeComment
         {
             videoId = null;
             chatId = null;
-            commentList = new List<Comment>();
+
+            commentManager = CommentManager.Instance;
 
             //debug用関数
             JsonStringFormatter.TextReset();
@@ -61,7 +63,7 @@ namespace Ichikara.YoutubeComment
         //public
         public void GetYoutubeURI()
         {
-            StartCoroutine(GetURICoroutine());
+            StartCoroutine(this.GetURICoroutine());
         }
 
 
@@ -109,7 +111,7 @@ namespace Ichikara.YoutubeComment
                 }
 
                 // chatIdを取得
-                StartCoroutine(GetChatId());
+                StartCoroutine(this.GetChatId());
 
             }
         }
@@ -130,30 +132,34 @@ namespace Ichikara.YoutubeComment
             {
                 string[] jsonData = channelRequest.downloadHandler.text.Split(splitString, StringSplitOptions.None);
 
-                foreach(var json in jsonData)
+                Debug.Log("-----------------------");
+                Debug.Log(channelRequest.downloadHandler.text);
+
+                foreach (var json in jsonData)
                 {
                     if(json.IndexOf("activeLiveChatId") <= 0)
                     {
                         Debug.Log("This is not comment.");
                         continue;
                     }
-                    Debug.Log("-----------------------");
-                    Debug.Log(channelRequest.downloadHandler.text);
 
                     chatId = JsonStringFormatter.GetFormattedString(deleteString, json);
                     break;
                 }
 
-                StartCoroutine(GetComment());
+                StartCoroutine(this.GetComment());
             }
 
         }
 
+        /// <summary>
+        /// Youtubeライブのコメントを取得するコルーチン
+        /// </summary>
+        /// <returns>The comment.</returns>
         private IEnumerator GetComment()
         {
             //コルーチンが２つ以上にならないように止める
-            StopCoroutine(InvokeWait());
-            //yield return new WaitForSeconds(5.0f);
+            StopCoroutine(this.InvokeWait());
 
             var commentURI = youtubeAPIbase + chatURIUp + chatId + pagetoken + nextPageTokenstr + chatURIbottom2 + apikey;
 
@@ -172,7 +178,7 @@ namespace Ichikara.YoutubeComment
 
                 Debug.Log("コメント--------------------");
                 Debug.Log(connectCommentRequest.downloadHandler.text);
-                Comment comment = new Comment();
+                CommentParts comment = new CommentParts();
                 foreach (var json in jsonData)
                 {
                     JsonStringFormatter.TextOutput(json);
@@ -185,7 +191,6 @@ namespace Ichikara.YoutubeComment
                         if (nextPageTokenstr == newToken)
                         {
                             Debug.Log("Same Token.");
-                            break;
                         }
                         else
                         {
@@ -193,11 +198,6 @@ namespace Ichikara.YoutubeComment
                             Debug.Log("Change Token.");
                             continue;
                         }
-                    }
-
-                    if (json.IndexOf("displayMessage") <= 0 && json.IndexOf("displayName") <= 0)
-                    {
-                        continue;
                     }
 
                     if (json.IndexOf("displayMessage") > 0)
@@ -210,17 +210,29 @@ namespace Ichikara.YoutubeComment
                         comment.displayName = JsonStringFormatter.GetFormattedString(deleteString, json);
                         Debug.Log("displayName : " + comment.displayName);
                     }
+
+                    if(comment.displayName != null && comment.displayMessage != null)
+                    {
+                        commentManager.GetComponent<CommentManager>().CommentUpdate(comment);
+                        comment = new CommentParts();
+                        yield return null;
+                    }
                 }
-                StartCoroutine(InvokeWait());
+                StartCoroutine(this.InvokeWait());
             }
+
         }
 
+        /// <summary>
+        /// 一定時間ごとにコメントを取得させるコルーチン
+        /// </summary>
+        /// <returns>The wait.</returns>
         private IEnumerator InvokeWait()
         {
 
-            yield return new WaitForSeconds(IntervalMillis);
+            yield return new WaitForSeconds(IntervalMillis / 1000.0f);
 
-            StartCoroutine(GetComment());
+            StartCoroutine(this.GetComment());
         }
     }
 }
