@@ -15,11 +15,6 @@ namespace Ichikara.YoutubeComment
 
     }
 
-    public struct CommentParticle
-    {
-        public Func<string, bool> func;
-        public Action action;
-    }
 
     public class Comment : MonoBehaviour
     {
@@ -27,13 +22,13 @@ namespace Ichikara.YoutubeComment
 
         [SerializeField]private Text displayMessage;
 
-        private List<CommentParticle> particleList = new List<CommentParticle>();
+       
 
         /// <summary>
         /// youtubeライブのコメント表示
         /// </summary>
         /// <param name="comment">Comment.</param>
-        public void SetComment(CommentParts comment)
+        public void SetComment(CommentParts comment, List<CommentParticle> particleList)
         {
             foreach(var particle in particleList)
             {
@@ -43,30 +38,12 @@ namespace Ichikara.YoutubeComment
                 }
             }
 
+            //uGUIのScaleを明示して大きさを固定
             this.gameObject.transform.localScale = Vector3.one;
+
             this.displayName.text = comment.displayName;
             this.displayMessage.text = comment.displayMessage;
         }
 
-        /// <summary>
-        /// 特定コメントのアクション登録関数
-        /// </summary>
-        /// <param name="func">Func.</param>
-        /// <param name="action">Action.</param>
-        public void SetParticleAction(Func<string, bool> func, Action action)
-        {
-            CommentParticle commentParticle;
-            commentParticle.func = func;
-            commentParticle.action = action;
-            this.SetParticleAction(commentParticle);
-        }
-        /// <summary>
-        /// 特定コメントのアクション登録関数
-        /// </summary>
-        /// <param name="commentParticle">Comment particle.</param>
-        public void SetParticleAction(CommentParticle commentParticle)
-        {
-            this.particleList.Add(commentParticle);
-        }
     }
 }

@@ -45,8 +45,6 @@ namespace Ichikara.YoutubeComment
 
         private GameObject commentManager;//シングルトンクラス
 
-        [Tooltip("コメント最大保持数")] [Range(20, 200)] [SerializeField] private int holdingNumber = 50;
-
         [Tooltip("コメント再取得インターバル(ミリ秒)")] [Range(4000, 10000)] [SerializeField] private int IntervalMillis = 5000;
 
         private void Start()
@@ -95,7 +93,7 @@ namespace Ichikara.YoutubeComment
                     //videoIdでなければcontinue
                     if (json.IndexOf("videoId") <= 0)
                     {
-                        Debug.Log("This is not videoId.");
+                        Debug.LogWarning("This is not videoId.");
                         continue;
                     }
 
@@ -146,7 +144,7 @@ namespace Ichikara.YoutubeComment
                 {
                     if(json.IndexOf("activeLiveChatId") <= 0)
                     {
-                        Debug.Log("This is not comment.");
+                        Debug.LogWarning("This is not comment.");
                         continue;
                     }
 

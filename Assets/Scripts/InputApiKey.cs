@@ -71,8 +71,5 @@ public class InputApiKey : MonoBehaviour {
     {
         youtubeApi.GetYoutubeURI();
         yield return null;
-        //this.gameObject.enabled = false;
-
-
     }
 }
