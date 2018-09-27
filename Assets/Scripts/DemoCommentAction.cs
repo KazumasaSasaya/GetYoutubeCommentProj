@@ -27,7 +27,7 @@ namespace Ichikara.YoutubeComment
                 //if(x.IndexOf("(") >= 0)
                 //Match match = Regex.Match(x, @"*(*");
 
-                if(Regex.Match(x, @"^[*\(*]").Success)
+                if(Regex.Match(x, @"[*\(*]").Success)
                 {
                     return true;
                 }
