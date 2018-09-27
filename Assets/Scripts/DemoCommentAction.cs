@@ -9,8 +9,6 @@ namespace Ichikara.YoutubeComment
 {
     public class DemoCommentAction : MonoBehaviour
     {
-
-        //[SerializeField] private Comment comment;
         private GameObject commentManager;
 
         private void Start()
@@ -23,10 +21,6 @@ namespace Ichikara.YoutubeComment
             //特定条件の無名関数登録
             Func<string, bool> func = x =>
             {
-                //if (ci.Compare(x, "8", CompareOptions.IgnoreWidth) >= 0)
-                //if(x.IndexOf("(") >= 0)
-                //Match match = Regex.Match(x, @"*(*");
-
                 if(Regex.Match(x, @"[*\(*]").Success)
                 {
                     return true;

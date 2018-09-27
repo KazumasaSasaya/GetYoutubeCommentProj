@@ -31,8 +31,6 @@ namespace Ichikara.YoutubeComment
 
         private string chatURIUp = "liveChat/messages?liveChatId=";
 
-        private bool connectionflag = false;
-
         private string nextPageTokenstr = null;
 
         private string jsontext;
@@ -181,8 +179,6 @@ namespace Ichikara.YoutubeComment
             {
                 string[] jsonData = connectCommentRequest.downloadHandler.text.Split(splitString, StringSplitOptions.None);
 
-                Debug.Log("コメント--------------------");
-                Debug.Log(connectCommentRequest.downloadHandler.text);
                 CommentParts comment = new CommentParts();
                 foreach (var json in jsonData)
                 {

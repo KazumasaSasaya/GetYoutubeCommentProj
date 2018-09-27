@@ -92,7 +92,7 @@ namespace Ichikara.YoutubeComment
 
             this.CommentDequeue();
 
-            //スクロールビューの一番下に強制遷移
+            //スクロールビューの一番下に強制移動
             scrollRect.verticalNormalizedPosition = 0;
         }
 
@@ -101,16 +101,13 @@ namespace Ichikara.YoutubeComment
         /// </summary>
         public void CommentDequeue()
         {
-            Debug.Log("QueueCount : " + queue.Count);
             if (queue.Count > holdingNumber)
             {
-
                 GameObject go = queue.Dequeue();
                 if(go != null)
                 {
                     Destroy(go);
                 }
-                Debug.Log("Dequeue Comment.");
             }
         }
     }

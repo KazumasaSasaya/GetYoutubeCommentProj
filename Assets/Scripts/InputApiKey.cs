@@ -5,8 +5,10 @@ using UnityEngine.UI;
 using Ichikara.YoutubeComment;
 
 
-public class InputApiKey : MonoBehaviour {
+public class InputApiKey : MonoBehaviour
+{
     [SerializeField] private GetYoutubeAPI youtubeApi;
+
     [SerializeField] private InputField field;
 	
     /// <summary>
@@ -28,11 +30,6 @@ public class InputApiKey : MonoBehaviour {
         InitInputField();
 
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     /// <summary>
     /// Log出力用メソッド
@@ -46,13 +43,11 @@ public class InputApiKey : MonoBehaviour {
         {
             return;
         }
-        Debug.Log("input keys:" + inputValue);
 
         StartCoroutine(UnactiveInputField(inputValue));
 
         InitInputField();
     }
-
 
     /// <summary>
     /// InputFieldの初期化用メソッド

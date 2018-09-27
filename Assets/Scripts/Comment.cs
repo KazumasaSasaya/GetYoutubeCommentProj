@@ -15,14 +15,11 @@ namespace Ichikara.YoutubeComment
 
     }
 
-
     public class Comment : MonoBehaviour
     {
         [SerializeField]private Text displayName;
 
         [SerializeField]private Text displayMessage;
-
-       
 
         /// <summary>
         /// youtubeライブのコメント表示
