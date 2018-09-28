@@ -16,8 +16,6 @@ namespace Ichikara.YoutubeComment
             //CommentManagerクラスを取得
             commentManager = CommentManager.Instance;
 
-            CompareInfo ci = CultureInfo.CurrentCulture.CompareInfo;
-
             //特定条件の無名関数登録
             Func<string, bool> func = x =>
             {

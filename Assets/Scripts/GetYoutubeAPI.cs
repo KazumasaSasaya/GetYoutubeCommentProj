@@ -19,21 +19,19 @@ namespace Ichikara.YoutubeComment
 
         private string searchBaseStr = "&eventType=live&type=video";
 
-        private string videoId;
+        private string videoId = null;
 
         private string youtubeAPIbase = "https://www.googleapis.com/youtube/v3/";
 
         private string channnelSearch = "videos?part=liveStreamingDetails&id=";
 
-        private string chatId;
+        private string chatId = null;
 
         private string pagetoken = "&pageToken=";
 
         private string chatURIUp = "liveChat/messages?liveChatId=";
 
         private string nextPageTokenstr = null;
-
-        private string jsontext;
 
         private string chatURIbottom2 = "&part=snippet,authorDetails&key=";
 
@@ -47,9 +45,6 @@ namespace Ichikara.YoutubeComment
 
         private void Start()
         {
-            videoId = null;
-            chatId = null;
-
             commentManager = CommentManager.Instance;
 
             //debug用関数
@@ -60,6 +55,24 @@ namespace Ichikara.YoutubeComment
         public void GetYoutubeURI()
         {
             StartCoroutine(this.GetURICoroutine());
+
+            //debug
+            StartCoroutine(this.GetYoutubeSuperchat());
+        }
+
+        private IEnumerator GetYoutubeSuperchat()
+        {
+            string uri = "https://www.googleapis.com/youtube/v3/superChatEvents?key=" + APIKEY.API_KEY + "&part=snippet";
+
+            Debug.Log("superChat : " + uri);
+
+            UnityWebRequest liveRequest = UnityWebRequest.Get(uri);
+            yield return liveRequest.SendWebRequest();
+
+            if(liveRequest.isNetworkError || liveRequest.isHttpError)
+            {
+                Debug.LogError(liveRequest.error);
+            }
         }
 
 
